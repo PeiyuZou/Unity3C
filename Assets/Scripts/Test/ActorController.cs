@@ -1,18 +1,9 @@
-//------------------------------------------------------------
-// 描述：角色控制
-// 作者：Z.P.Y
-// 时间：2024/09/21 07:46
-//------------------------------------------------------------
-
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Test
 {
-    /// <summary>
-    /// 角色控制
-    /// </summary>
     public class ActorController : MonoBehaviour
     {
         public PlayerInput PlayerInput;
@@ -20,12 +11,24 @@ namespace Test
         public Transform Trans;
         public float WalkSpeed = 1.4f;
         public float RunSpeed = 3.7f;
+        public float JumpVelocity = 3f;
 
         private Rigidbody m_Rigidbody;
-        private Vector3 m_MovingVector;
+
+        /// <summary>
+        /// 平面向量
+        /// </summary>
+        private Vector3 m_PlanarVector;
+        private bool m_IsLockPlanar;
+
+        /// <summary>
+        /// 跳跃冲量
+        /// </summary>
+        private Vector3 m_ThrustVector;
 
         private static readonly int s_Speed = Animator.StringToHash("Speed");
         private static readonly int s_Jump = Animator.StringToHash("Jump");
+        private static readonly int s_IsOnGround = Animator.StringToHash("IsOnGround");
 
         private void Awake()
         {
@@ -40,12 +43,15 @@ namespace Test
             {
                 Animator.SetTrigger(s_Jump);
             }
-            if (PlayerInput.InputSpeed > 0.1f)
+            if (PlayerInput.InputSpeed > 0.1f && !m_IsLockPlanar)
             {
                 var forward = Vector3.Slerp(Trans.forward, PlayerInput.InputDirection, 0.05f);
                 Trans.forward = forward;
             }
-            m_MovingVector = Trans.forward * (PlayerInput.InputSpeed * (PlayerInput.IsPressRun ? RunSpeed : WalkSpeed));
+            if (!m_IsLockPlanar)
+            {
+                m_PlanarVector = Trans.forward * (PlayerInput.InputSpeed * (PlayerInput.IsPressRun ? RunSpeed : WalkSpeed));
+            }
         }
 
         private void FixedUpdate()
@@ -54,7 +60,37 @@ namespace Test
             //m_Rigidbody.position += m_MovingVector * Time.fixedDeltaTime;
 
             //plan #2: using velocity
-            m_Rigidbody.velocity = new Vector3(m_MovingVector.x, m_Rigidbody.velocity.y, m_MovingVector.z);
+            m_Rigidbody.velocity = new Vector3(m_PlanarVector.x, m_Rigidbody.velocity.y, m_PlanarVector.z) + m_ThrustVector;
+            m_ThrustVector = Vector3.zero;
+        }
+
+        public void OnJumpEnter()
+        {
+            PlayerInput.Enable = false;
+            m_IsLockPlanar = true;
+            m_ThrustVector = new Vector3(0, JumpVelocity, 0);
+            Debug.LogError("OnJumpEnter!!");
+        }
+
+        public void OnJumpExit()
+        {
+            Debug.LogError("OnJumpExit!!");
+        }
+
+        public void OnGround()
+        {
+            Animator.SetBool(s_IsOnGround, true);
+        }
+
+        public void NotOnGround()
+        {
+            Animator.SetBool(s_IsOnGround, false);
+        }
+
+        public void OnGroundEnter()
+        {
+            PlayerInput.Enable = true;
+            m_IsLockPlanar = false;
         }
     }
 }
