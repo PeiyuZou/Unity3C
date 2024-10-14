@@ -69,12 +69,10 @@ namespace Test
             PlayerInput.Enable = false;
             m_IsLockPlanar = true;
             m_ThrustVector = new Vector3(0, JumpVelocity, 0);
-            Debug.LogError("OnJumpEnter!!");
         }
 
         public void OnJumpExit()
         {
-            Debug.LogError("OnJumpExit!!");
         }
 
         public void OnGround()
@@ -91,6 +89,12 @@ namespace Test
         {
             PlayerInput.Enable = true;
             m_IsLockPlanar = false;
+        }
+
+        public void OnFallEnter()
+        {
+            PlayerInput.Enable = false;
+            m_IsLockPlanar = true;
         }
     }
 }

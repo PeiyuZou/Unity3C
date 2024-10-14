@@ -310,7 +310,7 @@ MonoBehaviour:
   Trans: {fileID: 5387514499963016775}
   WalkSpeed: 1.4
   RunSpeed: 3.7
-  JumpVelocity: 3
+  JumpVelocity: 4
 --- !u!54 &805813749
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -564,6 +564,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CapsuleCollider: {fileID: 805813747}
+  DownwardOffset: 0.05
 --- !u!1 &2139818679
 GameObject:
   m_ObjectHideFlags: 0
