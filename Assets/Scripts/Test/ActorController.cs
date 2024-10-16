@@ -12,6 +12,7 @@ namespace Test
         public float WalkSpeed = 1.4f;
         public float RunSpeed = 3.7f;
         public float JumpVelocity = 3f;
+        public float RollVelocity = 3f;
 
         private Rigidbody m_Rigidbody;
 
@@ -29,6 +30,8 @@ namespace Test
         private static readonly int s_Speed = Animator.StringToHash("Speed");
         private static readonly int s_Jump = Animator.StringToHash("Jump");
         private static readonly int s_IsOnGround = Animator.StringToHash("IsOnGround");
+        private static readonly int s_Roll = Animator.StringToHash("Roll");
+        private static readonly int s_JabVelocity = Animator.StringToHash("JabVelocity");
 
         private void Awake()
         {
@@ -39,6 +42,12 @@ namespace Test
         {
             var animSpeed = Mathf.Lerp(Animator.GetFloat(s_Speed), (PlayerInput.IsPressRun ? 2f : 1f), 0.05f);
             Animator.SetFloat(s_Speed, PlayerInput.InputSpeed * animSpeed);
+
+            if (m_Rigidbody.velocity.magnitude > 5.0f)
+            {
+                Animator.SetTrigger(s_Roll);
+            }
+
             if (PlayerInput.IsTriggerJump)
             {
                 Animator.SetTrigger(s_Jump);
@@ -95,6 +104,24 @@ namespace Test
         {
             PlayerInput.Enable = false;
             m_IsLockPlanar = true;
+        }
+
+        public void OnRollEnter()
+        {
+            PlayerInput.Enable = false;
+            m_IsLockPlanar = true;
+            m_ThrustVector = new Vector3(0, RollVelocity, 0);
+        }
+
+        public void OnJabEnter()
+        {
+            PlayerInput.Enable = false;
+            m_IsLockPlanar = true;
+        }
+
+        public void OnJabUpdate()
+        {
+            m_ThrustVector = Trans.forward * Animator.GetFloat(s_JabVelocity);
         }
     }
 }
